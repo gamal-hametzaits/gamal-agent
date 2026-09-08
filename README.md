@@ -5,7 +5,7 @@
 ## מה יש ב-v0 (ועובד)
 
 - **ממשק צ'אט** — שיחה עם הגמל, סוכן מקומי שעונה בעברית. עיצוב כהה עם הדגשים אדומים, RTL מלא.
-- **זיכרון על המכשיר** — כל השיחות, הדירוגים וההעדפות נשמרים במסד נתונים מקומי (Room/SQLite). שום דבר לא יוצא מהמכשיר.
+- **זיכרון על המכשיר** — כל השיחות, הדירוגים וההעדפות נשמרים במסד נתונים מקומי (SQLite מקומי). שום דבר לא יוצא מהמכשיר.
 - **קליטת התראות** — שירות Notification Listener ששומר כותרות ותוכן של התראות נכנסות לארכיון מקומי מתגלגל (7 ימים). פועל **רק אחרי** שהמשתמש מאשר "גישה להתראות" בהגדרות המערכת, ויש מתג כיבוי/הפעלה בתוך האפליקציה. הסוכן יודע לסכם: "מה קיבלתי היום?".
 - **לולאת משוב** — כל תשובה של הסוכן ניתנת לדירוג 👍/👎. הדירוג מעדכן פרופיל העדפות מקומי (אורך תשובות מועדף, נושאים קרובים ללב), והתשובות הבאות מסתגלות בהתאם.
 
@@ -61,10 +61,8 @@ keytool -genkeypair -keystore gamal.keystore -alias gamal -keyalg RSA -keysize 2
 ```
 app/src/main/java/dev/hametzaits/gamal/
 ├── GamalApp.kt                 # Application + SharedPreferences
-├── data/                       # Room: entities, DAOs, database
-│   ├── Entities.kt             #   messages / preferences / notifications
-│   ├── Daos.kt
-│   └── AppDatabase.kt
+├── data/
+│   └── GamalStore.kt           # SQLiteOpenHelper: messages / preferences / notifications
 ├── agent/
 │   ├── GamalAgent.kt           # המוח המקומי v0 (כללים + פרופיל העדפות)
 │   └── PreferenceLearner.kt    # לולאת המשוב: דירוגים -> פרופיל
