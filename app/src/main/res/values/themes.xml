@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Gamal" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">@color/gamal_red</item>
+        <item name="colorPrimaryVariant">@color/gamal_red_dark</item>
+        <item name="colorPrimaryDark">@color/gamal_bg</item>
+        <item name="colorAccent">@color/gamal_red</item>
+        <item name="android:colorBackground">@color/gamal_bg</item>
+        <item name="android:statusBarColor">@color/gamal_bg</item>
+        <item name="android:navigationBarColor">@color/gamal_bg</item>
+        <item name="android:windowBackground">@color/gamal_bg</item>
+    </style>
+</resources>

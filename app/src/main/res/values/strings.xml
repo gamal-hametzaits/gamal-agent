@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">הגמל</string>
+    <string name="notification_service_label">הגמל - קליטת התראות</string>
+    <string name="chat_subtitle">הסוכן האישי שלך · הכל נשאר במכשיר</string>
+    <string name="input_hint">כתוב להגמל…</string>
+    <string name="empty_chat">🐪 היי! אני הגמל, הסוכן האישי שלך.\nאני רץ כולו במכשיר שלך - בלי ענן, בלי מיקרופון.\nככל שתדרג.י את התשובות שלי (👍/👎), כך אלמד מה אתה אוהב.</string>
+    <string name="settings_title">הגדרות</string>
+    <string name="notif_access_title">גישה להתראות</string>
+    <string name="notif_access_enabled">מופעל - הגמל לומד מהתראות שנכנסות למכשיר</string>
+    <string name="notif_access_disabled">כבוי - הגמל לא רואה התראות. כדי להפעיל, אשר גישה במערכת:</string>
+    <string name="open_system_settings">פתח הגדרות גישה להתראות</string>
+    <string name="learn_toggle">למידה מהתראות</string>
+    <string name="learn_toggle_sub">כשהגישה מופעלת, שמור כותרות ותוכן התראות במאגר המקומי (במכשיר בלבד)</string>
+    <string name="stats_title">מה נלמד עד כה</string>
+    <string name="privacy_title">פרטיות ושקיפות</string>
+    <string name="privacy_body">הגמל לא מקשיב במיקרופון ולא שולח דבר מהמכשיר. כל הזיכרון (שיחות, דירוגים, התראות) נשמר במסד נתונים מקומי (SQLite/Room) במכשיר בלבד. גישה להתראות פועלת רק אחרי שאתה מאשר אותה במפורש בהגדרות המערכת.</string>
+    <string name="back">חזרה</string>
+</resources>
