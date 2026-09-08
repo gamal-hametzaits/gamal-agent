@@ -2,10 +2,10 @@ package dev.hametzaits.gamal
 
 import android.app.Application
 import android.content.Context
-import dev.hametzaits.gamal.data.AppDatabase
+import dev.hametzaits.gamal.data.GamalStore
 
 class GamalApp : Application() {
-    val db: AppDatabase by lazy { AppDatabase.get(this) }
+    val store: GamalStore by lazy { GamalStore.get(this) }
 
     companion object {
         fun prefs(context: Context) =

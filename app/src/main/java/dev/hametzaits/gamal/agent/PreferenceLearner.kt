@@ -1,8 +1,7 @@
 package dev.hametzaits.gamal.agent
 
-import dev.hametzaits.gamal.data.AppDatabase
-import dev.hametzaits.gamal.data.MessageEntity
-import dev.hametzaits.gamal.data.PreferenceEntity
+import dev.hametzaits.gamal.data.GamalStore
+import dev.hametzaits.gamal.data.Message
 
 /**
  * Feedback learning loop, v0. Thumbs up/down on an agent reply nudges a local
@@ -13,9 +12,9 @@ import dev.hametzaits.gamal.data.PreferenceEntity
  * Scores are clamped and stored on-device only. This is a transparent
  * heuristic - the honest foundation for real RL later (see README roadmap).
  */
-class PreferenceLearner(private val db: AppDatabase) {
+class PreferenceLearner(private val store: GamalStore) {
 
-    suspend fun onFeedback(agentMessage: MessageEntity, rating: Int) {
+    fun onFeedback(agentMessage: Message, rating: Int) {
         if (rating == 0) return
         val delta = if (rating > 0) 1.0 else -1.0
 
@@ -24,16 +23,16 @@ class PreferenceLearner(private val db: AppDatabase) {
         bump("style:verbosity", if (longReply) delta * 0.5 else -delta * 0.25, max = 3.0)
 
         // Topic signals from the user message that preceded this reply.
-        val prevUser = db.messageDao().lastUserMessageBefore(agentMessage.timestamp) ?: return
+        val prevUser = store.lastUserMessageBefore(agentMessage.timestamp) ?: return
         tokenize(prevUser.text).take(5).forEach { token ->
             bump("kw:$token", delta, max = 5.0)
         }
     }
 
-    private suspend fun bump(key: String, delta: Double, max: Double) {
-        val current = db.preferenceDao().score(key) ?: 0.0
+    private fun bump(key: String, delta: Double, max: Double) {
+        val current = store.prefScore(key) ?: 0.0
         val next = (current + delta).coerceIn(-max, max)
-        db.preferenceDao().upsert(PreferenceEntity(key, next))
+        store.upsertPref(key, next)
     }
 
     private fun tokenize(text: String): List<String> =

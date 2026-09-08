@@ -9,16 +9,16 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import dev.hametzaits.gamal.R
-import dev.hametzaits.gamal.data.MessageEntity
+import dev.hametzaits.gamal.data.Message
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class ChatAdapter(
-    private val onFeedback: (MessageEntity, Int) -> Unit
+    private val onFeedback: (Message, Int) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val items = mutableListOf<MessageEntity>()
+    private val items = mutableListOf<Message>()
     private val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
 
     companion object {
@@ -26,7 +26,7 @@ class ChatAdapter(
         private const val TYPE_AGENT = 1
     }
 
-    fun submit(messages: List<MessageEntity>) {
+    fun submit(messages: List<Message>) {
         items.clear()
         items.addAll(messages)
         notifyDataSetChanged()

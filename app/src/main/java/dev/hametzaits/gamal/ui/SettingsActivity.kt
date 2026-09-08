@@ -10,14 +10,14 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.switchmaterial.SwitchMaterial
 import dev.hametzaits.gamal.GamalApp
 import dev.hametzaits.gamal.R
-import dev.hametzaits.gamal.data.AppDatabase
+import dev.hametzaits.gamal.data.GamalStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class SettingsActivity : AppCompatActivity() {
 
-    private lateinit var db: AppDatabase
+    private lateinit var store: GamalStore
     private lateinit var status: TextView
     private lateinit var stats: TextView
 
@@ -25,7 +25,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        db = (application as GamalApp).db
+        store = (application as GamalApp).store
         status = findViewById(R.id.txtNotifStatus)
         stats = findViewById(R.id.txtStats)
 
@@ -51,9 +51,9 @@ class SettingsActivity : AppCompatActivity() {
         )
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val notifCount = db.notificationDao().totalCount()
-            val ratedCount = db.messageDao().ratedCount()
-            val profileSize = db.preferenceDao().all().size
+            val notifCount = store.totalNotifications()
+            val ratedCount = store.ratedCount()
+            val profileSize = store.allPrefs().size
             withContext(Dispatchers.Main) {
                 stats.text = "התראות שנקלטו: $notifCount\n" +
                     "תשובות שדירגת: $ratedCount\n" +

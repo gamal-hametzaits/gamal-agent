@@ -1,6 +1,6 @@
 package dev.hametzaits.gamal.agent
 
-import dev.hametzaits.gamal.data.AppDatabase
+import dev.hametzaits.gamal.data.GamalStore
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -11,15 +11,15 @@ import java.util.Locale
  * notification archive. No network calls, no external model.
  * See README: this is the honest foundation for a future RL loop.
  */
-class GamalAgent(private val db: AppDatabase) {
+class GamalAgent(private val store: GamalStore) {
 
     private val greetings = listOf("היי", "שלום", "אהלן", "מה נשמע", "מה קורה", "בוקר טוב", "ערב טוב")
     private val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
     private val dateFmt = SimpleDateFormat("d בMMMM yyyy", Locale("he"))
 
-    suspend fun respond(rawInput: String): String {
+    fun respond(rawInput: String): String {
         val input = rawInput.trim()
-        val prefs = db.preferenceDao().all().associate { it.key to it.score }
+        val prefs = store.allPrefs()
         val verbosity = prefs["style:verbosity"] ?: 0.0
 
         val likedTopic = prefs.entries
@@ -51,15 +51,15 @@ class GamalAgent(private val db: AppDatabase) {
         } else body
     }
 
-    private suspend fun notificationSummary(): String {
+    private fun notificationSummary(): String {
         val dayAgo = System.currentTimeMillis() - 24L * 60 * 60 * 1000
-        val count = db.notificationDao().countSince(dayAgo)
+        val count = store.countNotificationsSince(dayAgo)
         if (count == 0) {
             return "אין לי עדיין הרשאה לקרוא התראות, או שלא נכנסו התראות ביממה האחרונה. אפשר להפעיל גישה בהגדרות ← גישה להתראות. אני קורא התראות רק באישור מפורש שלך, והכול נשאר במכשיר."
         }
-        val top = db.notificationDao().topAppSince(dayAgo)
-        return if (top?.appName != null) {
-            "ביממה האחרונה קלטתי $count התראות, בעיקר מ-${top.appName}. הכול שמור במאגר המקומי במכשיר שלך בלבד."
+        val top = store.topAppSince(dayAgo)
+        return if (top != null) {
+            "ביממה האחרונה קלטתי $count התראות, בעיקר מ-${top.first}. הכול שמור במאגר המקומי במכשיר שלך בלבד."
         } else {
             "ביממה האחרונה קלטתי $count התראות. הכול שמור במאגר המקומי במכשיר שלך בלבד."
         }

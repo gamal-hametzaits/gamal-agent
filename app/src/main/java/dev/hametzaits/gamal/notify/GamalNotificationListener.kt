@@ -4,8 +4,7 @@ import android.app.Notification
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import dev.hametzaits.gamal.GamalApp
-import dev.hametzaits.gamal.data.AppDatabase
-import dev.hametzaits.gamal.data.NotificationEntity
+import dev.hametzaits.gamal.data.GamalStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,7 +20,7 @@ import kotlinx.coroutines.launch
 class GamalNotificationListener : NotificationListenerService() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val db: AppDatabase by lazy { AppDatabase.get(this) }
+    private val store: GamalStore by lazy { GamalStore.get(this) }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         if (sbn.packageName == packageName) return
@@ -43,17 +42,15 @@ class GamalNotificationListener : NotificationListenerService() {
         }
 
         scope.launch {
-            db.notificationDao().insert(
-                NotificationEntity(
-                    packageName = sbn.packageName,
-                    appName = appName,
-                    title = title,
-                    text = text,
-                    timestamp = System.currentTimeMillis()
-                )
+            store.insertNotification(
+                packageName = sbn.packageName,
+                appName = appName,
+                title = title,
+                text = text,
+                timestamp = System.currentTimeMillis()
             )
             // Keep a rolling 7-day archive on device.
-            db.notificationDao().pruneBefore(
+            store.pruneNotificationsBefore(
                 System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000
             )
         }

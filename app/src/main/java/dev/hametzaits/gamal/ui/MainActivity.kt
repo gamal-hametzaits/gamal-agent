@@ -15,16 +15,14 @@ import dev.hametzaits.gamal.GamalApp
 import dev.hametzaits.gamal.R
 import dev.hametzaits.gamal.agent.GamalAgent
 import dev.hametzaits.gamal.agent.PreferenceLearner
-import dev.hametzaits.gamal.data.AppDatabase
-import dev.hametzaits.gamal.data.MessageEntity
+import dev.hametzaits.gamal.data.GamalStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var db: AppDatabase
+    private lateinit var store: GamalStore
     private lateinit var agent: GamalAgent
     private lateinit var learner: PreferenceLearner
     private lateinit var adapter: ChatAdapter
@@ -35,9 +33,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        db = (application as GamalApp).db
-        agent = GamalAgent(db)
-        learner = PreferenceLearner(db)
+        store = (application as GamalApp).store
+        agent = GamalAgent(store)
+        learner = PreferenceLearner(store)
 
         recycler = findViewById(R.id.recyclerChat)
         emptyView = findViewById(R.id.txtEmpty)
@@ -46,7 +44,7 @@ class MainActivity : AppCompatActivity() {
 
         adapter = ChatAdapter { message, newRating ->
             lifecycleScope.launch(Dispatchers.IO) {
-                db.messageDao().setRating(message.id, newRating)
+                store.setRating(message.id, newRating)
                 learner.onFeedback(message.copy(rating = newRating), newRating)
             }
         }
@@ -56,13 +54,8 @@ class MainActivity : AppCompatActivity() {
         recycler.layoutManager = layoutManager
         recycler.adapter = adapter
 
-        lifecycleScope.launch {
-            db.messageDao().observeMessages().collect { messages ->
-                adapter.submit(messages)
-                emptyView.visibility = if (messages.isEmpty()) View.VISIBLE else View.GONE
-                if (messages.isNotEmpty()) recycler.scrollToPosition(messages.size - 1)
-            }
-        }
+        store.onMessagesChanged = { refreshChat() }
+        refreshChat()
 
         findViewById<ImageButton>(R.id.btnSettings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
@@ -81,18 +74,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        store.onMessagesChanged = null
+        super.onDestroy()
+    }
+
+    private fun refreshChat() {
+        val messages = store.allMessages()
+        runOnUiThread {
+            adapter.submit(messages)
+            emptyView.visibility = if (messages.isEmpty()) View.VISIBLE else View.GONE
+            if (messages.isNotEmpty()) recycler.scrollToPosition(messages.size - 1)
+        }
+    }
+
     private fun sendMessage(text: String) {
         lifecycleScope.launch(Dispatchers.IO) {
-            val now = System.currentTimeMillis()
-            db.messageDao().insert(MessageEntity(role = "user", text = text, timestamp = now))
+            store.insertMessage("user", text, System.currentTimeMillis())
             delay(350) // small beat so the reply feels considered, not canned
             val reply = agent.respond(text)
-            db.messageDao().insert(
-                MessageEntity(role = "agent", text = reply, timestamp = System.currentTimeMillis())
-            )
-            withContext(Dispatchers.Main) {
-                if (adapter.itemCount > 0) recycler.smoothScrollToPosition(adapter.itemCount - 1)
-            }
+            store.insertMessage("agent", reply, System.currentTimeMillis())
         }
     }
 }
